@@ -1,0 +1,495 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>AgriConnect — Prototype (HTML)</title>
+  <style>
+    :root{ --bg:#f7fafc; --card:#fff; --accent:#1167b1; --muted:#555; --ok:#1b9a59; --danger:#c0392b;}
+    body{font-family:Inter,system-ui,Arial,sans-serif;margin:0;background:var(--bg);color:#111;}
+    .container{max-width:1100px;margin:28px auto;padding:18px;}
+    .top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;}
+    header h1{margin:0;font-size:20px;color:var(--accent);}
+    .card{background:var(--card);border-radius:10px;padding:14px;box-shadow:0 6px 18px rgba(16,24,40,0.06);}
+    .roles button{margin-right:8px;padding:8px 12px;border-radius:8px;border:1px solid #e5e7eb;background:white;cursor:pointer;}
+    .roles button.active{background:var(--accent);color:white;border-color:var(--accent);}
+    .grid{display:grid;grid-template-columns:1fr 420px;gap:14px;margin-top:12px;}
+    .listing{border:1px solid #eef2f7;padding:10px;border-radius:8px;margin-bottom:10px;}
+    .muted{color:var(--muted);font-size:13px;}
+    .row{display:flex;gap:8px;align-items:center;}
+    .btn{background:var(--accent);color:white;padding:8px 12px;border-radius:8px;border:0;cursor:pointer;}
+    .btn.ghost{background:transparent;color:var(--accent);border:1px solid #dbeafe;}
+    label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px;}
+    input,select,textarea{width:100%;padding:8px;border-radius:8px;border:1px solid #e6eef7;background:#fff}
+    .small{font-size:13px;padding:6px 8px;border-radius:6px;}
+    .listing h3{margin:0 0 6px 0;}
+    .flex-between{display:flex;justify-content:space-between;align-items:center;}
+    .notice{background:#fff4e5;border-left:4px solid #f59e0b;padding:8px;border-radius:6px;margin-bottom:10px;}
+    .tag{background:#eef2ff;color:#1e40af;padding:4px 8px;border-radius:999px;font-size:12px;}
+    .order{border-left:4px solid #34d399;padding:10px;border-radius:6px;margin-bottom:10px;background:#f8fffb;}
+    .transport-offer{border:1px dashed #e6eef7;padding:8px;border-radius:8px;margin-top:8px;}
+    .track {font-weight:600;color:var(--accent);}
+    footer{margin-top:18px;color:var(--muted);font-size:13px;text-align:center}
+    @media(max-width:880px){ .grid{grid-template-columns:1fr; } .top{flex-direction:column;align-items:flex-start} }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="top">
+      <header>
+        <h1>AgriConnect — Cloud Marketplace Prototype (HTML)</h1>
+        <div class="muted">Connect: Farmers • Transporters • Buyers — WAN-ready concept</div>
+      </header>
+
+      <div class="card" style="display:flex;gap:12px;align-items:center;">
+        <div>
+          <div class="muted">Active role</div>
+          <div class="roles" id="roleButtons">
+            <button data-role="guest" class="active">Guest</button>
+            <button data-role="farmer">Farmer</button>
+            <button data-role="buyer">Buyer</button>
+            <button data-role="transporter">Transporter</button>
+          </div>
+        </div>
+
+        <div style="min-width:220px;">
+          <div class="muted">Quick search</div>
+          <input id="searchInput" placeholder="Search crop, region, farmer..." />
+        </div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <!-- Left: Marketplace -->
+      <div>
+        <div class="card">
+          <div class="flex-between" style="margin-bottom:12px">
+            <div>
+              <h2 style="margin:0">Marketplace</h2>
+              <div class="muted">Browse listings and place orders</div>
+            </div>
+            <div class="muted">Listings: <span id="listCount">0</span></div>
+          </div>
+
+          <div class="notice">
+            This is a front-end prototype. In real deployment, the platform runs on cloud servers and connects participants via WAN (mobile/satellite/cellular internet).
+          </div>
+
+          <div style="margin-bottom:12px">
+            <label>Filter by region</label>
+            <select id="regionFilter">
+              <option value="">All regions</option>
+              <option>Center</option>
+              <option>West</option>
+              <option>North</option>
+              <option>South</option>
+              <option>East</option>
+            </select>
+          </div>
+
+          <div id="listings"></div>
+        </div>
+
+        <div class="card" style="margin-top:12px;">
+          <h3 style="margin-top:0">Orders & Tracking</h3>
+          <div id="ordersArea">
+            <div class="muted">No orders yet.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Role-specific actions -->
+      <aside>
+        <div class="card" id="rolePanel">
+          <h3 style="margin-top:0">Guest actions</h3>
+          <div class="muted">Switch role to see role-specific actions (Farmer / Buyer / Transporter)</div>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <h3 style="margin-top:0">Transporters (demo)</h3>
+          <div id="transportList"></div>
+          <div style="margin-top:8px">
+            <button class="btn" id="addMockTransport">Add Mock Transporter</button>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <h3 style="margin-top:0">Data</h3>
+          <div class="muted">Save/load demo data</div>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button class="btn ghost" id="resetBtn">Reset</button>
+            <button class="btn" id="exportBtn">Export JSON</button>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <footer class="muted">
+      Prototype — save the file and open in browser. Uses localStorage for data. Built for demonstration.
+    </footer>
+  </div>
+
+  <script>
+    /*********************
+     * Simple prototype data & storage
+     *********************/
+    const LS_KEY = 'agriconnect_demo_v1';
+
+    const defaultState = {
+      listings: [
+        { id:'L-1001', title:'Tomatoes - 2,000 kg', farmer:'M. Nkwelle', region:'Center', pricePerKg:250, qtyKg:2000, quality:'Fair', notes:'Fresh harvest', createdAt: '2025-10-15' },
+        { id:'L-1002', title:'Maize - 5,000 kg', farmer:'AgroCoop', region:'West', pricePerKg:150, qtyKg:5000, quality:'Good', notes:'Dry maize', createdAt: '2025-10-12' }
+      ],
+      transporters: [
+        { id:'T-101', name:'Alpha Logistics', vehicle:'Truck - 10T' },
+        { id:'T-102', name:'GreenMove', vehicle:'Van - 2T' }
+      ],
+      orders: []
+    };
+
+    // load or init
+    let state = loadState();
+
+    function loadState(){
+      try {
+        const raw = localStorage.getItem(LS_KEY);
+        if(raw) return JSON.parse(raw);
+      } catch(e){}
+      localStorage.setItem(LS_KEY, JSON.stringify(defaultState));
+      return JSON.parse(JSON.stringify(defaultState));
+    }
+    function saveState(){ localStorage.setItem(LS_KEY, JSON.stringify(state)); }
+
+    /*********************
+     * Helpers & UI wiring
+     *********************/
+    const roleButtons = document.getElementById('roleButtons');
+    const rolePanel = document.getElementById('rolePanel');
+    const listingsEl = document.getElementById('listings');
+    const transportListEl = document.getElementById('transportList');
+    const ordersArea = document.getElementById('ordersArea');
+    const listCount = document.getElementById('listCount');
+    const searchInput = document.getElementById('searchInput');
+    const regionFilter = document.getElementById('regionFilter');
+
+    let currentRole = 'guest';
+    function setRole(r){
+      currentRole = r;
+      Array.from(roleButtons.children).forEach(btn => btn.classList.toggle('active', btn.dataset.role===r));
+      renderRolePanel();
+      renderAll();
+    }
+    roleButtons.addEventListener('click', (e)=> {
+      if(e.target.dataset.role) setRole(e.target.dataset.role);
+    });
+
+    document.getElementById('addMockTransport').addEventListener('click', ()=>{
+      const id = 'T-' + Math.floor(Math.random()*90000+1000);
+      state.transporters.push({ id, name: 'Transporter ' + id.slice(-4), vehicle:'Truck - 5T' });
+      saveState(); renderTransporters();
+    });
+
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      if(!confirm('Reset demo data?')) return;
+      state = JSON.parse(JSON.stringify(defaultState));
+      saveState(); renderAll();
+    });
+
+    document.getElementById('exportBtn').addEventListener('click', () => {
+      const data = JSON.stringify(state, null, 2);
+      const blob = new Blob([data], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'agriconnect-export.json'; a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    searchInput.addEventListener('input', renderListings);
+    regionFilter.addEventListener('change', renderListings);
+
+    /*********************
+     * Render functions
+     *********************/
+    function renderAll(){
+      renderListings();
+      renderTransporters();
+      renderOrders();
+      listCount.textContent = state.listings.length;
+    }
+
+    function renderListings(){
+      const q = (searchInput.value||'').toLowerCase();
+      const region = regionFilter.value;
+      listingsEl.innerHTML = '';
+      const filtered = state.listings.filter(l => {
+        const matchesQ = [l.title,l.farmer,l.notes,l.region].join(' ').toLowerCase().includes(q);
+        const matchesR = region ? l.region===region : true;
+        return matchesQ && matchesR;
+      });
+      if(filtered.length===0){
+        listingsEl.innerHTML = '<div class="muted">No listings found.</div>';
+        return;
+      }
+
+      filtered.forEach(l=>{
+        const div = document.createElement('div');
+        div.className = 'listing';
+        div.innerHTML = `
+          <div class="row" style="justify-content:space-between">
+            <div>
+              <h3>${escapeHtml(l.title)}</h3>
+              <div class="muted">Farmer: ${escapeHtml(l.farmer)} • Region: ${escapeHtml(l.region)} • Quality: ${escapeHtml(l.quality)}</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-weight:700">${formatCurrency(l.pricePerKg)}/kg</div>
+              <div class="muted">${l.qtyKg.toLocaleString()} kg</div>
+            </div>
+          </div>
+          <p class="muted" style="margin-top:8px">${escapeHtml(l.notes||'—')}</p>
+          <div style="display:flex;gap:8px;margin-top:10px">
+            ${ currentRole==='farmer' && l.farmer.includes('You') ? '<button class="small" data-action="edit" data-id="'+l.id+'">Edit</button>' : ''}
+            ${ currentRole==='buyer' ? '<button class="btn small" data-action="order" data-id="'+l.id+'">Place Order</button>' : '<button class="btn ghost small" data-action="view" data-id="'+l.id+'">View</button>'}
+          </div>
+        `;
+        listingsEl.appendChild(div);
+      });
+
+      // attach actions
+      listingsEl.querySelectorAll('button').forEach(btn=>{
+        const act = btn.dataset.action;
+        const id = btn.dataset.id;
+        btn.addEventListener('click', ()=> {
+          if(act==='order') openOrderModal(id);
+          if(act==='edit') openEditListing(id);
+          if(act==='view') alert('Listing: ' + id);
+        });
+      });
+    }
+
+    function renderTransporters(){
+      transportListEl.innerHTML = '';
+      state.transporters.forEach(t=>{
+        const d = document.createElement('div');
+        d.className = 'muted';
+        d.style.marginBottom = '8px';
+        d.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center">
+          <div><strong>${escapeHtml(t.name)}</strong><div class="muted">${escapeHtml(t.vehicle)} • ID: ${t.id}</div></div>
+          <div><button class="small" data-id="${t.id}" data-action="assign">Assign</button></div>
+        </div>`;
+        transportListEl.appendChild(d);
+      });
+      transportListEl.querySelectorAll('button').forEach(b=>{
+        b.addEventListener('click', ()=> {
+          const id = b.dataset.id;
+          if(currentRole!=='transporter'){ alert('Switch to Transporter role to accept jobs.'); return; }
+          alert('Pretend to accept job as transporter ' + id + ' — in full app transporter would see offers and accept.');
+        });
+      });
+    }
+
+    function renderOrders(){
+      ordersArea.innerHTML = '';
+      if(state.orders.length===0){
+        ordersArea.innerHTML = '<div class="muted">No orders yet.</div>';
+        return;
+      }
+      state.orders.forEach(o=>{
+        const div = document.createElement('div');
+        div.className = 'order';
+        const listing = state.listings.find(l=>l.id===o.listingId) || { title:'(deleted)' };
+        div.innerHTML = `
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div><strong>Order ${o.id}</strong> • ${escapeHtml(listing.title)} • ${o.qtyKg.toLocaleString()} kg</div>
+            <div class="muted">${new Date(o.createdAt).toLocaleString()}</div>
+          </div>
+          <div style="margin-top:8px">
+            <div class="muted">Status: <span class="track">${escapeHtml(o.status)}</span></div>
+            <div id="offers-${o.id}">${renderOffersHtml(o)}</div>
+          </div>
+        `;
+        ordersArea.appendChild(div);
+
+        // bind offer actions
+        const offersDiv = div.querySelector(`#offers-${o.id}`);
+        offersDiv.querySelectorAll('button[data-action="assign"]').forEach(b=>{
+          b.addEventListener('click', ()=>{
+            const tId = b.dataset.tid;
+            assignTransporter(o.id, tId);
+          });
+        });
+        offersDiv.querySelectorAll('button[data-action="track"]').forEach(b=>{
+          b.addEventListener('click', ()=> showTracking(o.id));
+        });
+      });
+    }
+
+    function renderOffersHtml(o){
+      if(o.offers && o.offers.length){
+        return o.offers.map(of=>`
+          <div class="transport-offer">
+            <div style="display:flex;justify-content:space-between">
+              <div><strong>${escapeHtml(of.name)}</strong> — ${escapeHtml(of.vehicle)}</div>
+              <div>${formatCurrency(of.price)}</div>
+            </div>
+            <div class="muted" style="margin-top:6px">
+              ETA: ${of.eta} hrs • Rating: ${of.rating || '4.5'}
+              &nbsp;&nbsp; <button class="small" data-action="assign" data-tid="${of.id}">Assign</button>
+              &nbsp;&nbsp; <button class="small" data-action="track">Track</button>
+            </div>
+          </div>
+        `).join('');
+      } else {
+        return `<div class="muted">Waiting for transporter offers...</div>`;
+      }
+    }
+
+    /*********************
+     * Actions: create listing, orders, offers, assign transporter
+     *********************/
+    function openOrderModal(listingId){
+      const listing = state.listings.find(l=>l.id===listingId);
+      if(!listing) return alert('Listing not found');
+      if(currentRole!=='buyer') return alert('Switch to Buyer role to place an order.');
+      const qty = prompt(`Place order for "${listing.title}".\nAvailable: ${listing.qtyKg} kg\nEnter quantity (kg):`, Math.min(100, listing.qtyKg));
+      const qtyNum = Number(qty);
+      if(!qtyNum || qtyNum<=0) return;
+      const order = {
+        id: 'O-' + Math.floor(Math.random()*90000+1000),
+        listingId, qtyKg: qtyNum, orderedBy: 'DemoBuyer', status: 'created',
+        createdAt: new Date().toISOString(), offers: []
+      };
+      state.orders.unshift(order);
+      saveState();
+      renderOrders();
+
+      // Simulate transporter offers arriving via "WAN"
+      setTimeout(()=> createMockOffersForOrder(order.id), 1200);
+      setTimeout(()=> createMockOffersForOrder(order.id), 2400);
+    }
+
+    function createMockOffersForOrder(orderId){
+      const order = state.orders.find(o=>o.id===orderId);
+      if(!order) return;
+      const t = state.transporters[Math.floor(Math.random()*state.transporters.length)];
+      if(!t) return;
+      const price = Math.max(20000, Math.round((50 + Math.random()*200) * (order.qtyKg/100)));
+      const eta = Math.round(2 + Math.random()*24);
+      const offer = { id:t.id, name:t.name, vehicle:t.vehicle, price, eta, rating: (4 + Math.random()).toFixed(1) };
+      order.offers.push(offer);
+      saveState();
+      renderOrders();
+    }
+
+    function assignTransporter(orderId, transporterId){
+      const order = state.orders.find(o=>o.id===orderId);
+      if(!order) return;
+      const offer = order.offers.find(of=>of.id===transporterId);
+      if(!offer) return alert('Offer not found');
+      order.assigned = offer;
+      order.status = 'in-transit';
+      order.tracking = { progress: 0, lat: 4.05 + Math.random()*0.2, lng: 9.70 + Math.random()*0.2 };
+      saveState();
+      renderOrders();
+
+      // simulate progress
+      const tick = setInterval(()=>{
+        if(order.tracking.progress >= 100){ order.status='delivered'; saveState(); renderOrders(); clearInterval(tick); return; }
+        order.tracking.progress += Math.floor(10 + Math.random()*15);
+        if(order.tracking.progress > 100) order.tracking.progress = 100;
+        saveState(); renderOrders();
+      }, 2500);
+    }
+
+    function showTracking(orderId){
+      const order = state.orders.find(o=>o.id===orderId);
+      if(!order || !order.tracking) return alert('No tracking available yet.');
+      alert(`Tracking Order ${order.id}\nStatus: ${order.status}\nProgress: ${order.tracking.progress}%\nApprox location: ${order.tracking.lat.toFixed(3)}, ${order.tracking.lng.toFixed(3)}`);
+    }
+
+    function openEditListing(id){
+      const l = state.listings.find(x=>x.id===id);
+      if(!l) return;
+      const newTitle = prompt('Edit title', l.title);
+      if(newTitle) { l.title = newTitle; saveState(); renderAll(); }
+    }
+
+    /*********************
+     * Role panel UI
+     *********************/
+    function renderRolePanel(){
+      if(currentRole==='guest'){
+        rolePanel.innerHTML = `<h3 style="margin-top:0">Guest actions</h3>
+          <div class="muted">Switch role to interact. Try Farmer to add listings, Buyer to place orders, Transporter to accept jobs.</div>`;
+      }
+      else if(currentRole==='farmer'){
+        rolePanel.innerHTML = `<h3 style="margin-top:0">Farmer dashboard</h3>
+          <div class="muted">Create a listing to sell crops directly to buyers.</div>
+          <div style="margin-top:8px">
+            <label>Crop title</label><input id="f_title" placeholder="e.g., Cassava - 1,000 kg" />
+            <label style="margin-top:8px">Region</label><input id="f_region" placeholder="Center" />
+            <label style="margin-top:8px">Quantity (kg)</label><input id="f_qty" type="number" />
+            <label style="margin-top:8px">Price per kg (FCFA)</label><input id="f_price" type="number" />
+            <label style="margin-top:8px">Notes</label><textarea id="f_notes" rows="2"></textarea>
+            <div style="margin-top:8px"><button class="btn" id="createListingBtn">Create Listing</button></div>
+          </div>`;
+        document.getElementById('createListingBtn').addEventListener('click', ()=> {
+          const title = document.getElementById('f_title').value.trim();
+          const region = document.getElementById('f_region').value.trim() || 'Unknown';
+          const qty = Number(document.getElementById('f_qty').value) || 0;
+          const price = Number(document.getElementById('f_price').value) || 0;
+          const notes = document.getElementById('f_notes').value.trim();
+          if(!title || qty<=0 || price<=0) return alert('Please enter title, qty and price.');
+          const id = 'L-' + Math.floor(Math.random()*90000+1000);
+          state.listings.unshift({ id, title, farmer: 'You (Farmer)', region, qtyKg: qty, pricePerKg: price, quality:'Varied', notes, createdAt: new Date().toISOString() });
+          saveState(); renderAll();
+          // clear fields
+          document.getElementById('f_title').value=''; document.getElementById('f_qty').value=''; document.getElementById('f_price').value=''; document.getElementById('f_notes').value='';
+        });
+      }
+      else if(currentRole==='buyer'){
+        rolePanel.innerHTML = `<h3 style="margin-top:0">Buyer dashboard</h3>
+          <div class="muted">Browse listings and click <strong>Place Order</strong> to request products. Transport offers will appear automatically.</div>
+          <div style="margin-top:8px"><label>Buyer name (demo)</label><input id="buyerName" placeholder="e.g., Hotel A" /></div>
+          <div style="margin-top:8px"><button class="btn" id="refreshOffers">Refresh Offers</button></div>
+        `;
+        document.getElementById('refreshOffers').addEventListener('click', ()=> {
+          // create mock offers for any order without offers
+          state.orders.filter(o=>o.offers.length===0).forEach(o=> createMockOffersForOrder(o.id));
+          saveState(); renderOrders();
+        });
+      }
+      else if(currentRole==='transporter'){
+        rolePanel.innerHTML = `<h3 style="margin-top:0">Transporter dashboard</h3>
+          <div class="muted">View incoming offers and accept assignments (demo).</div>
+          <div style="margin-top:8px">
+            <label>Your transporter ID</label><input id="transporterId" placeholder="e.g., T-101" />
+            <div style="margin-top:8px"><button class="btn" id="mockAccept">Claim Offer</button></div>
+          </div>`;
+        document.getElementById('mockAccept').addEventListener('click', ()=> {
+          const tid = document.getElementById('transporterId').value.trim();
+          if(!tid) return alert('Enter your transporter ID in the field.');
+          // find first order with offers that include this transporter
+          const order = state.orders.find(o=> o.offers.some(of=> of.id===tid) );
+          if(!order) return alert('No offers found for this transporter id.');
+          assignTransporter(order.id, tid);
+        });
+      }
+    }
+
+    /*********************
+     * Utilities
+     *********************/
+    function escapeHtml(s){ return String(s||'').replace(/[&<>"]/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c])); }
+    function formatCurrency(x){ return `FCFA ${Number(x).toLocaleString()}`; }
+
+    // initial render
+    setRole('guest');
+    renderAll();
+
+    // Expose some helpers to console for debugging
+    window.__agri_state = state;
+    window.printState = ()=>console.log(JSON.parse(JSON.stringify(state)));
+
+  </script>
+</body>
+</html>
